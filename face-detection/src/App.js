@@ -32,11 +32,23 @@ function App() {
     
   }
 
+  const handleVideoOnPlay = () => {
+    setInterval(async () => {
+      if (initializing) {
+        setInitializing(false);
+      }
+      const detections = await faceapi.detectAllFaces(webcamRef.current, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
+
+      console.log(detections);
+    }, 100)
+  }
+
+
   return (
     <div className="App">
 
       <span>{initializing ? 'Initializing' : 'Ready'}</span>
-      <video ref = {webcamRef} autoPlay muted height={videoHeight} width={videoWidth} />
+      <video ref = {webcamRef} autoPlay muted height={videoHeight} width={videoWidth} onPlay={handleVideoOnPlay}/>
       <canvas ref = {canvasRef} style={{position: "absolute", top: "0px", left: "0px"}}/>
     </div>
 
