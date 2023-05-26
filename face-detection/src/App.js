@@ -1,7 +1,6 @@
-import React, {useRef, useState, useEffect} from 'react';
-import Webcam from 'react-webcam';
+import React, { useRef, useState, useEffect } from 'react';
 import * as faceapi from 'face-api.js';
-
+import './App.css';
 
 function App() {
   const videoHeight = 480;
@@ -9,7 +8,7 @@ function App() {
   const [initializing, setInitializing] = useState(false);
   const webcamRef = useRef();
   const canvasRef = useRef();
- 
+
   useEffect(() => {
     const loadModels = async () => {
       const MODEL_URL = process.env.PUBLIC_URL + '/models';
@@ -18,41 +17,52 @@ function App() {
         faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
         faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
         faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-        faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+        faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)
       ]).then(startVideo);
-    }
+    };
     loadModels();
-  }
-  ,[])
+  }, []);
 
   const startVideo = () => {
-    navigator.getUserMedia({
-      video: {}
-    }, stream => webcamRef.current.srcObject = stream, err => console.log(err))
-    
-  }
+   navigator.getUserMedia(
+      { video: {} },
+      stream => (webcamRef.current.srcObject = stream),
+
+      err => console.error(err)
+    );
+  };
 
   const handleVideoOnPlay = () => {
     setInterval(async () => {
       if (initializing) {
         setInitializing(false);
       }
-      const detections = await faceapi.detectAllFaces(webcamRef.current, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
+      const displaySize = { width: videoWidth, height: videoHeight };
+      faceapi.matchDimensions(canvasRef.current, displaySize);
+
+      const detections = await faceapi
+        .detectAllFaces(webcamRef.current, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withFaceExpressions();
+      const resizedDetections = faceapi.resizeResults(detections, displaySize);
+      canvasRef.current.getContext('2d').clearRect(0, 0, videoWidth, videoHeight);
+      faceapi.draw.drawDetections(canvasRef.current, resizedDetections);
+      faceapi.draw.drawFaceLandmarks(canvasRef.current, resizedDetections);
+      faceapi.draw.drawFaceExpressions(canvasRef.current, resizedDetections);
 
       console.log(detections);
-    }, 100)
-  }
-
+    }, 100);
+  };
 
   return (
     <div className="App">
-
       <span>{initializing ? 'Initializing' : 'Ready'}</span>
-      <video ref = {webcamRef} autoPlay muted height={videoHeight} width={videoWidth} onPlay={handleVideoOnPlay}/>
-      <canvas ref = {canvasRef} style={{position: "absolute", top: "0px", left: "0px"}}/>
+      <div className="display-flex justify-content-center">
+        <video ref={webcamRef} autoPlay muted height={videoHeight} width={videoWidth} onPlay={handleVideoOnPlay} />
+        <canvas ref={canvasRef} className="position-absolute" style={{ top: 20, left: 240 }} />
+      </div>
     </div>
-
   );
-    
 }
+
 export default App;
