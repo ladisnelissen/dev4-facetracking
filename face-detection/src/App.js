@@ -26,13 +26,21 @@ function App() {
   ,[])
 
   const startVideo = () => {
-    navigator.getUserMedia(
-      { video: {} },
-      stream => (webcamRef.current.srcObject = stream)
-
-    );
+    navigator.getUserMedia({
+      video: {}
+    }, stream => webcamRef.current.srcObject = stream, err => console.log(err))
+    
   }
 
+  return (
+    <div className="App">
+
+      <span>{initializing ? 'Initializing' : 'Ready'}</span>
+      <video ref = {webcamRef} autoPlay muted height={videoHeight} width={videoWidth} />
+      <canvas ref = {canvasRef} style={{position: "absolute", top: "0px", left: "0px"}}/>
+    </div>
+
+  );
     
 }
 export default App;
