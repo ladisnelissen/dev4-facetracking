@@ -4,16 +4,20 @@ import './App.css';
 
 
 function App() {
+  //Definiëren van videogrootte
   const videoHeight = 480;
   const videoWidth = 640;
+  //Definiëren van de webcam en canvas
   const [initializing, setInitializing] = useState(false);
   const webcamRef = useRef();
   const canvasRef = useRef();
 
+  //Gebruik van useEffect om de modellen te laden
   useEffect(() => {
     const loadModels = async () => {
       const MODEL_URL = process.env.PUBLIC_URL + '/models';
       setInitializing(true);
+      //Inladen van de modellen
       Promise.all([
         faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
         faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
@@ -24,6 +28,7 @@ function App() {
     loadModels();
   }, []);
 
+  //Functie om de video te starten
   const startVideo = () => {
    navigator.getUserMedia(
       { video: {} },
@@ -33,14 +38,17 @@ function App() {
     );
   };
 
+  //Functie om de video te starten in de canvas
   const handleVideoOnPlay = () => {
     setInterval(async () => {
       if (initializing) {
         setInitializing(false);
       }
+      //Definiëren van de grootte van de video en canvas
       const displaySize = { width: videoWidth, height: videoHeight };
       faceapi.matchDimensions(canvasRef.current, displaySize);
 
+      //Detecteren van gezicht en gezichtsuitdrukkingen
       const detections = await faceapi
         .detectAllFaces(webcamRef.current, new faceapi.TinyFaceDetectorOptions())
         .withFaceLandmarks()
@@ -53,6 +61,7 @@ function App() {
 
       console.log(detections);
 
+      // Array of emotions
       const emotions = ['happy', 'sad', 'angry', 'disgusted', 'surprised', 'neutral'];
 
     // Update emotion percentages
@@ -68,12 +77,10 @@ function App() {
       return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
-
-
-
     }, 100);
   };
 
+  //Renderen van de video en canvas
   return (
     <div className="App">
       <span>{initializing ? 'Initializing' : 'Ready'}</span>
@@ -81,6 +88,7 @@ function App() {
         <video ref={webcamRef} autoPlay muted height={videoHeight} width={videoWidth} onPlay={handleVideoOnPlay} />
         <canvas ref={canvasRef} className="position-absolute" style={{ top: 20, left: 445 }} />
       </div>
+
       <div class = "emotions">
         <p class="happy"></p>
         <p class="sad"></p>
