@@ -13,3 +13,35 @@
 .position-absolute {
   position: absolute;
 }
+
+.emotions p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+.emotions .happy {
+  color: blue;
+}
+
+.emotions .sad {
+  color: purple;
+}
+
+.emotions .angry {
+  color: red;
+}
+
+.emotions .disgusted {
+  color: green;
+}
+
+.emotions .surprised {
+  color: orange;
+}
+
+.emotions .neutral {
+  color: gray;
+}
